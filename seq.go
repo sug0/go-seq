@@ -21,6 +21,7 @@ type seqJSON = struct {
 const (
     bigEncode = 'A' - 26
     maxSmall  = 'z' - 'a'
+    maxSmall2 = maxSmall + 1
     maxLarge  = (maxSmall + 1) + ('Z' - 'A')
     maxLarge2 = maxLarge + 1
 )
@@ -195,7 +196,7 @@ func decode(d byte) byte {
     if d >= 'a' {
         return d - 'a'
     }
-    return (maxSmall + 1) + (d - 'A')
+    return maxSmall2 + (d - 'A')
 }
 
 func encode(d byte) byte {
