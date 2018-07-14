@@ -8,7 +8,7 @@ import (
 )
 
 type Seq struct {
-    sync.Mutex
+    mux   sync.Mutex
     value []byte
     free  [][]byte
 }
@@ -73,8 +73,8 @@ func NewSeqFrom(value []byte) (*Seq, error) {
 
 // Returns the next ID in the sequence.
 func (s *Seq) Next() []byte {
-    s.Lock()
-    defer s.Unlock()
+    s.mux.Lock()
+    defer s.mux.Unlock()
 
     if s.free != nil {
         lim := len(s.free) - 1
@@ -98,10 +98,10 @@ func (s *Seq) Next() []byte {
 // Next(); the free'd ID will be returned on the
 // next Next() call.
 func (s *Seq) Free(value []byte) error {
-    s.Lock()
-    defer s.Unlock()
+    s.mux.Lock()
+    defer s.mux.Unlock()
 
-    if cmp := Cmp(value, s.value); cmp >= 0 || s.beenFreed(value) {
+    if Cmp(value, s.value) >= 0 || s.beenFreed(value) {
         return ErrNotFreeable
     }
 
@@ -113,8 +113,8 @@ func (s *Seq) Free(value []byte) error {
 func (s *Seq) MarshalJSON() ([]byte, error) {
     var buf bytes.Buffer
 
-    s.Lock()
     buf.Write([]byte(`{"curr":"`))
+    s.mux.Lock()
     buf.Write(s.value)
     buf.WriteByte('"')
 
@@ -132,7 +132,7 @@ func (s *Seq) MarshalJSON() ([]byte, error) {
         buf.WriteByte('"')
         buf.WriteByte(']')
     }
-    s.Unlock()
+    s.mux.Unlock()
     buf.WriteByte('}')
 
     return buf.Bytes(), nil
@@ -146,7 +146,7 @@ func (s *Seq) UnmarshalJSON(p []byte) error {
         return err
     }
 
-    s.Lock()
+    s.mux.Lock()
     s.value = []byte(obj.Curr)
     if obj.Free != nil && len(obj.Free) > 0 {
         if s.free != nil {
@@ -159,7 +159,7 @@ func (s *Seq) UnmarshalJSON(p []byte) error {
     } else {
         s.free = nil
     }
-    s.Unlock()
+    s.mux.Unlock()
 
     return nil
 }
