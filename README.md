@@ -6,6 +6,12 @@ Painless alphabetical sequential IDs.
 
 Visit [godoc](https://godoc.org/github.com/sugoiuguu/go-seq).
 
+# Get this package
+
+```
+$ go get github.com/sugoiuguu/go-seq
+```
+
 # Example
 
 ## New
