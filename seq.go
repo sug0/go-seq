@@ -54,8 +54,7 @@ func Cmp(x, y []byte) int {
 
 // Returns a new sequence starting at 'a'.
 func NewSeq() *Seq {
-    s,_ := NewSeqFrom([]byte{'a'})
-    return s
+    return &Seq{value: []byte{'a'}}
 }
 
 // Returns a new sequence starting at a
@@ -70,7 +69,7 @@ func NewSeqFrom(value []byte) (*Seq, error) {
 }
 
 // Returns the next ID in the sequence.
-func (s *Seq) Next() []byte {
+func (s *Seq) Next(nextBuf []byte) []byte {
     if s.free != nil {
         lim := len(s.free) - 1
         pop := s.free[lim]
@@ -81,12 +80,10 @@ func (s *Seq) Next() []byte {
         return pop
     }
 
-    next := make([]byte, len(s.value))
-    copy(next, s.value)
-
+    nextBuf = append(nextBuf, s.value...)
     s.sum()
 
-    return next
+    return nextBuf
 }
 
 // Frees an ID that has already been returned with
